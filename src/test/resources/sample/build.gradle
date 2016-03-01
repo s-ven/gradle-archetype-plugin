@@ -1,0 +1,10 @@
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'com.orctom.gradle:gradle-archetype-plugin:1.0-SNAPSHOT'
+    }
+}
+
+apply plugin:'com.orctom.archetype'

@@ -1,0 +1,1 @@
+include "${projectName}-service-model", "${projectName}-service-web"
