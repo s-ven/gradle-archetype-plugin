@@ -18,7 +18,7 @@ class ArchetypeTask extends DefaultTask {
     String projectVersion = getParam('version', 'Please enter the version name', '1.0-SNAPSHOT')
 
     sourceDir = new File(project.projectDir, System.getProperty('templates', 'src/main/resources/templates'))
-    def target = getParam('target', 'Please enter the target folder name where the generated project locates', '../')
+    def target = getParam('target', 'Please enter the target folder name where the generated project locates', 'generated')
     if (target.startsWith('/')) {
       targetDir = new File(target, projectName)
     } else {

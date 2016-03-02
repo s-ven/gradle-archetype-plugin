@@ -20,6 +20,8 @@ gradle generate -Dtarget=target -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversi
 ### Template Folder
 `src/main/resources/templates`
 
+Can be override by `-Dtemplates=your-template-folder`
+
 ### Non-templates:
 Files that will not be resoled by variables, as they would fail if try to resolve.
 Put the non-template lists to `src/main/resource/.nontemplates`.
