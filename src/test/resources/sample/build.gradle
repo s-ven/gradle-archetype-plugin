@@ -3,7 +3,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'com.orctom.gradle:gradle-archetype-plugin:1.0-SNAPSHOT'
+        classpath 'com.orctom.gradle:gradle-archetype-plugin:1.1-SNAPSHOT'
     }
 }
 

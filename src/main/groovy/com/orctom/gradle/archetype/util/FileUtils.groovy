@@ -37,6 +37,7 @@ class FileUtils {
             try {
               target << resolve(source.text, binding)
             } catch (Exception e) {
+              println "[WARNING] Failed to resolve variables in: ${source.path}"
               Files.copy(source.toPath(), target.toPath())
             }
           }
@@ -52,10 +53,10 @@ class FileUtils {
   }
 
   static String resolve(String text, Map binding) {
-    String escaped = text.replaceAll('\\$\\{', '@__').replaceAll('\\}', '__@').replaceAll('\\$', '@@@')
-    String ready = escaped.replaceAll('(.*)@(\\w+)@(.*)', '$1\\$\\{$2\\}$3')
+    String escaped = text.replaceAll('\\$', '__DOLLAR__')
+    String ready = escaped.replaceAll('@(\\w+)@', '\\$\\{$1\\}')
     String resolved = engine.createTemplate(ready).make(binding)
-    String done = resolved.replaceAll('@@@', '\\$').replaceAll('__@', '\\}').replaceAll('@__', '\\$\\{')
+    String done = resolved.replaceAll('__DOLLAR__', '\\$')
     done
   }
 
