@@ -1,28 +1,38 @@
-allprojects  {
-  apply plugin: 'maven'
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.orctom.gradle:gradle-applyscript-plugin:1.1"
+    classpath "com.bmuschko:gradle-nexus-plugin:2.3.1"
+  }
+}
 
-  group = "$group"
+apply plugin: "com.orctom.applyscript"
+applyscript 'com.officedepot.gradle:gradle-scripts:1.1/od.gradle'
+
+group = "@group@"
+
+allprojects {
+  repositories {
+    mavenLocal()
+    maven { url "http://nexus.uschecomrnd.net/content/groups/public/" }
+  }
 }
 
 subprojects {
   apply plugin: 'java'
+  apply plugin: 'maven'
+  apply plugin: 'jacoco'
+  apply plugin: "idea"
+  apply plugin: "eclipse"
+
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
 
-  task packageSources(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-  }
-
-  artifacts.archives packageSources
-  repositories {
-    mavenLocal()
-    
-    maven { url "http://central" }
-  }
-
-  configurations.all {}
   dependencies {
-    testCompile group: 'junit', name: 'junit', version:'4.12'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
   }
 }

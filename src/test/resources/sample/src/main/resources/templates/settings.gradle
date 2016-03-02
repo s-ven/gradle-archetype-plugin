@@ -1,1 +1,1 @@
-include "${projectName}-service-model", "${projectName}-service-web"
+include "@projectName@-service-model", "@projectName@-service-web"

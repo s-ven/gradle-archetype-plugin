@@ -1,4 +1,4 @@
-package ${package}.service;
+package @packageName@.service;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

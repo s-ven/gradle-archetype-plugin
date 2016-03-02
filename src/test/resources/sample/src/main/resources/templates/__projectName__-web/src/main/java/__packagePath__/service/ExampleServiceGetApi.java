@@ -1,4 +1,4 @@
-package ${package}.service;
+package @packageName@.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +11,8 @@ import com.officedepot.servicecore.exceptions.DataProviderException;
 import com.officedepot.servicecore.model.CoreServiceResponse;
 import com.officedepot.servicecore.service.AbstractBaseService;
 
-import ${package}.model.ExampleRequest;
-import ${package}.model.ExampleTO;
+import @packageName@.model.ExampleRequest;
+import @packageName@.model.ExampleTO;
 
 /**
  * 

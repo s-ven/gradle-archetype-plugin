@@ -1,4 +1,4 @@
-package ${package}.resource;
+package @packageName@.resource;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.officedepot.servicecore.model.CoreServiceResponse;
 import com.officedepot.servicecore.resource.AbstractBaseController;
 
-import ${package}.model.ExampleTO;
-import ${package}.model.ExampleRequest;
-import ${package}.service.ExampleServiceGetApi;
+import @packageName@.model.ExampleTO;
+import @packageName@.model.ExampleRequest;
+import @packageName@.service.ExampleServiceGetApi;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -1,4 +1,4 @@
-package ${package}.service;
+package @packageName@.service;
 
 import static org.junit.Assert.assertTrue;
 
@@ -12,8 +12,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.hystrix.Hystrix;
 import com.officedepot.servicecore.model.CoreServiceResponse;
-import ${package}.model.ExampleRequest;
-import ${package}.model.ExampleTO;
+import @packageName@.model.ExampleRequest;
+import @packageName@.model.ExampleTO;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)

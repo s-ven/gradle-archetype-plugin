@@ -1,4 +1,4 @@
-package ${package}.model;
+package @packageName@.model;
 
 public class ExampleTO {
 	

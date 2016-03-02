@@ -1,9 +1,13 @@
 package com.orctom.gradle.archetype.util
 
 import groovy.io.FileType
-import groovy.text.SimpleTemplateEngine
+import groovy.text.GStringTemplateEngine
+
+import java.nio.file.Files
 
 class FileUtils {
+
+  def static engine = new GStringTemplateEngine()
 
   static List<File> getTemplates(File sourceDir) {
     List<File> list = []
@@ -13,24 +17,88 @@ class FileUtils {
     list
   }
 
-  static void generate(List<File> templates, Map binding, File sourceDir, File targetDir) {
-    println('generate................')
-    binding.each {entry ->
-      println entry.key + " -> " + entry.value
+  static void generate(List<File> templates, Map binding, File sourceDir, File targetDir, Set<String> nonTemplates) {
+    if (targetDir.exists()) {
+      targetDir.deleteDir()
     }
-    def engine = new SimpleTemplateEngine()
+    targetDir.mkdirs()
+
     templates.each { source ->
-      println source.path
-      def target = new File(targetDir, getRelativePath(sourceDir, source))
-      target << engine.createTemplate(source).make(binding)
+      try {
+        File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
+        String path = engine.createTemplate(target.path).make(binding)
+        target = new File(path)
+        ensureParentDirs(target)
+
+        if (!isDir(target)) {
+          if (isNotTemplate(source.path, nonTemplates)) {
+            Files.copy(source.toPath(), target.toPath())
+          } else {
+            try {
+              target << resolve(source.text, binding)
+            } catch (Exception e) {
+              Files.copy(source.toPath(), target.toPath())
+            }
+          }
+        }
+      } catch (Exception e) {
+        e.printStackTrace()
+      }
     }
+  }
+
+  static boolean isNotTemplate(String source, Set<String> nonTemplates) {
+    source in nonTemplates
+  }
+
+  static String resolve(String text, Map binding) {
+    String escaped = text.replaceAll('\\$\\{', '@__').replaceAll('\\}', '__@').replaceAll('\\$', '@@@')
+    String ready = escaped.replaceAll('(.*)@(\\w+)@(.*)', '$1\\$\\{$2\\}$3')
+    String resolved = engine.createTemplate(ready).make(binding)
+    String done = resolved.replaceAll('@@@', '\\$').replaceAll('__@', '\\}').replaceAll('@__', '\\$\\{')
+    done
   }
 
   static String getRelativePath(File sourceDir, File file) {
-    sourceDir.toURI().relativize( file.toURI()).toString()
+    sourceDir.toURI().relativize(file.toURI()).toString()
   }
 
-  static String transformFileName(String pathName) {
+  static String resolvePaths(String pathName) {
+    if (!pathName.contains('__')) {
+      pathName
+    }
 
+    String path = '';
+    pathName.split('/').each {
+      if (it.contains('__')) {
+        path += resolvePath(it)
+      } else {
+        path += it
+      }
+
+      path += '/'
+    }
+
+    path
+  }
+
+  static String resolvePath(String path) {
+    path.replaceAll('(.*)__(\\w+)__(.*)', '$1\\$\\{$2\\}$3')
+  }
+
+  static void ensureParentDirs(File file) {
+    if (file.exists()) {
+      return
+    }
+
+    if (isDir(file)) {
+      file.mkdirs()
+    } else {
+      ensureParentDirs(file.getParentFile())
+    }
+  }
+
+  static boolean isDir(File file) {
+    !file.name.contains('.')
   }
 }
