@@ -14,13 +14,19 @@ gradle generate
 
 ### Batch mode:
 ```
-gradle generate -Dtarget=target -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
+gradle generate -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
 ```
 
 ### Template Folder
-`src/main/resources/templates`
+Default to: `src/main/resources/templates`
 
 Can be override by `-Dtemplates=your-template-folder`
+
+### Generated Project(s) Folder
+Default to: `generated`
+Will recreate this folder on every run.
+
+Can be override by `-Dtarget=folder-name`
 
 ### Non-templates:
 Files that will not be resoled by variables, as they would fail if try to resolve.
@@ -50,8 +56,8 @@ Follows ant style. The tailing slash for directory is mandatory.
 | name  | project.name  | dummy-app |
 | version | project.version | 1.0-SNAPSHOT |
 | projectName | project.name | dummy-app |
-| packageName | (group + name) replace non-characters to '.' | com.xxx.yyy.dummy.app |
-| packagePath | replace '.' with '/' in packageName | com/xxx/yyy/dummy/app |
+| packageName | (group + name) replaced non-characters with '.' | com.xxx.yyy.dummy.app |
+| packagePath | replaced '.' with '/' in packageName | com/xxx/yyy/dummy/app |
 
 
 ### Token
@@ -59,3 +65,6 @@ Follows ant style. The tailing slash for directory is mandatory.
 
 ## Sample
 https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources/sample
+
+## Known Issues
+ * Doesn't work with property files that has such escapes: key=https`\`://aaa.bbb.ccc/xxx, remove the `\` escape to have it work.
