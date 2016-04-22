@@ -28,23 +28,44 @@ class ArchetypeTask extends DefaultTask {
     Set<String> nonTemplatesWildcards = new File(project.projectDir, 'src/main/resources/.nontemplates').readLines() as Set
     FileNameFinder finder = new FileNameFinder()
     nonTemplatesWildcards.each {
-      def files = finder.getFileNames(project.projectDir.path, it)
+      def files = finder.getFileNames(sourceDir.path, it)
       nonTemplates.addAll(files)
     }
 
-    Map binding = ['group': projectGroup, 'name': projectName, 'version': projectVersion]
-    extendBinding(binding)
+    Map binding = [
+        'group': projectGroup,
+        'groupId': projectGroup,
+        'name': projectName,
+        'projectName': projectName,
+        'artifactId': projectName,
+        'version': projectVersion,
+        'project.version': projectVersion
+    ]
+    extendedBinding(binding)
 
     List<File> templates = FileUtils.getTemplates(sourceDir)
     FileUtils.generate(templates, binding, sourceDir, targetDir, nonTemplates)
   }
 
-  static void extendBinding(Map binding) {
+  static void extendedBinding(Map binding) {
     String packageName = binding.get('group') + '/' + binding.get('name')
     String normalizedPackageName = packageName.replaceAll('//', '/')
     binding.put('packageName', normalizedPackageName.replaceAll('\\W', '.'))
     binding.put('packagePath', normalizedPackageName.replaceAll('\\W', '/'))
-    binding.put('projectName', binding.get('name'))
+
+    String extraProperties = System.getProperty("sun.java.command")
+    if (null != extraProperties) {
+      extraProperties.split('\\s+').each {item ->
+        int equalSignIndex
+        if (item.startsWith("-D") && ( equalSignIndex = item.indexOf('=')) > 2) {
+          String key = item.substring(2, equalSignIndex)
+          String value = item.substring(equalSignIndex + 1, item.length())
+          if (!binding.containsKey(key)) {
+            binding.put(key, value)
+          }
+        }
+      }
+    }
   }
 
   static String getParam(String name, String prompt, String defaultValue = null) {

@@ -13,8 +13,6 @@ buildscript {
 apply plugin: "com.orctom.applyscript"
 applyscript 'com.officedepot.gradle:gradle-scripts:1.1/od.gradle'
 
-group = "@group@"
-
 allprojects {
   repositories {
     mavenLocal()

@@ -17,11 +17,18 @@ class FileUtils {
     list
   }
 
-  static void generate(List<File> templates, Map binding, File sourceDir, File targetDir, Set<String> nonTemplates) {
+  static void generate(
+      List<File> templates,
+      Map binding,
+      File sourceDir,
+      File targetDir,
+      Set<String> nonTemplates) {
     if (targetDir.exists()) {
       targetDir.deleteDir()
     }
     targetDir.mkdirs()
+
+    logBindings(binding)
 
     templates.each { source ->
       try {
@@ -38,6 +45,7 @@ class FileUtils {
               target << resolve(source.text, binding)
             } catch (Exception e) {
               println "[WARNING] Failed to resolve variables in: ${source.path}"
+              System.err.println e.getMessage()
               Files.copy(source.toPath(), target.toPath())
             }
           }
@@ -46,6 +54,15 @@ class FileUtils {
         e.printStackTrace()
       }
     }
+
+    println '[INFO] Done'
+  }
+
+  static def logBindings(Map map) {
+    println '-'*40
+    println ' Variables:'
+    map.each {k, v -> println ' ' + k.padRight(25) + ' = ' + v}
+    println '-'*40
   }
 
   static boolean isNotTemplate(String source, Set<String> nonTemplates) {

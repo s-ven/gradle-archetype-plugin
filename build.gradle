@@ -1,8 +1,8 @@
 plugins {
-    id "com.gradle.plugin-publish" version "0.9.1"
+  id "com.gradle.plugin-publish" version "0.9.1"
 }
 plugins {
-    id 'net.researchgate.release' version '2.3.4'
+  id 'net.researchgate.release' version '2.3.4'
 }
 
 apply plugin: 'groovy'
@@ -11,26 +11,27 @@ apply plugin: 'maven'
 apply plugin: 'idea'
 
 repositories {
-    mavenLocal()
-    mavenCentral()
+  mavenLocal()
+  mavenCentral()
+  jcenter()
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+  compile gradleApi()
+  compile localGroovy()
 }
 
 pluginBundle {
-    website = 'https://github.com/orctom/gradle-archetype-plugin'
-    vcsUrl = 'https://github.com/orctom/gradle-archetype-plugin'
+  website = 'https://github.com/orctom/gradle-archetype-plugin'
+  vcsUrl = 'https://github.com/orctom/gradle-archetype-plugin'
 
-    description = 'Gradle plugin that generate projects from template.'
-    tags = ['archetype', 'template']
+  description = 'Gradle plugin that generate projects from template.'
+  tags = ['archetype', 'template']
 
-    plugins {
-        plugin {
-            id = 'com.orctom.archetype'
-            displayName = 'Archetype Generate Plugin'
-        }
+  plugins {
+    plugin {
+      id = 'com.orctom.archetype'
+      displayName = 'Archetype Generate Plugin'
     }
+  }
 }
