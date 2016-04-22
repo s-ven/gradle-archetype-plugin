@@ -60,9 +60,7 @@ class ArchetypeTask extends DefaultTask {
         if (item.startsWith("-D") && ( equalSignIndex = item.indexOf('=')) > 2) {
           String key = item.substring(2, equalSignIndex)
           String value = item.substring(equalSignIndex + 1, item.length())
-          if (!binding.containsKey(key)) {
-            binding.put(key, value)
-          }
+          binding.put(key, value)
         }
       }
     }
