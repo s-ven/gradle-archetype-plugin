@@ -35,7 +35,7 @@ class FileUtils {
         File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
         String path = engine.createTemplate(target.path).make(binding)
         target = new File(path)
-        ensureParentDirs(target)
+        ensureParentDirs(target, source.isFile())
 
         if (!isDir(target)) {
           if (isNotTemplate(source.path, nonTemplates)) {
@@ -104,15 +104,11 @@ class FileUtils {
     path.replaceAll('(.*)__(\\w+)__(.*)', '$1\\$\\{$2\\}$3')
   }
 
-  static void ensureParentDirs(File file) {
-    if (file.exists()) {
-      return
-    }
-
-    if (isDir(file)) {
-      file.mkdirs()
+  static void ensureParentDirs(File file, boolean isFile) {
+    if (isFile) {
+      file.getParentFile().mkdirs();
     } else {
-      ensureParentDirs(file.getParentFile())
+      file.mkdirs();
     }
   }
 
