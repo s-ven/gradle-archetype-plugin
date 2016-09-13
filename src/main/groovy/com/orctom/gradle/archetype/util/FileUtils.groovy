@@ -35,9 +35,10 @@ class FileUtils {
         File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
         String path = engine.createTemplate(target.path).make(binding)
         target = new File(path)
-        ensureParentDirs(target, source.isFile())
+        boolean isFile = source.isFile();
+        ensureParentDirs(target, isFile)
 
-        if (!isDir(target)) {
+        if (isFile) {
           if (isNotTemplate(source.path, nonTemplates)) {
             Files.copy(source.toPath(), target.toPath())
           } else {
@@ -110,9 +111,5 @@ class FileUtils {
     } else {
       file.mkdirs();
     }
-  }
-
-  static boolean isDir(File file) {
-    !file.name.contains('.')
   }
 }
