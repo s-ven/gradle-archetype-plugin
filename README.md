@@ -20,7 +20,7 @@ gradle generate -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dve
 ### Template Folder
 Default to: `src/main/resources/templates`
 
-Can be override by `-Dtemplates=your-template-folder`
+Can be overridden by `-Dtemplates=your-template-folder`
 
 ### Generated Project(s) Folder
 Default to: `generated`
@@ -44,6 +44,8 @@ Sample:
 **/*.7z
 gradle/
 .gradle/
+gradlew
+gradlew.bat
 ```
 
 Follows ant style. The tailing slash for directory is mandatory.
