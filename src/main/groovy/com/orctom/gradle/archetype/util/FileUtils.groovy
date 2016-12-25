@@ -35,7 +35,7 @@ class FileUtils {
         File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
         String path = engine.createTemplate(target.path).make(binding)
         target = new File(path)
-        boolean isFile = source.isFile();
+        boolean isFile = source.isFile()
         ensureParentDirs(target, isFile)
 
         if (isFile) {

@@ -8,3 +8,5 @@
 **/*.7z
 gradle/
 .gradle/
+gradlew
+gradlew.bat
