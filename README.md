@@ -30,7 +30,7 @@ Can be override by `-Dtarget=folder-name`
 
 ### Non-templates:
 Files that will not be resoled by variables, as they would fail if try to resolve.
-Put the non-template lists to `src/main/resource/.nontemplates`.
+Put the non-template lists to `src/main/resources/.nontemplates`.
 
 Sample:
 ```
@@ -69,4 +69,4 @@ Follows ant style. The tailing slash for directory is mandatory.
 https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources/sample
 
 ## Known Issues
- * Doesn't work with property files that has such escapes: key=https`\`://aaa.bbb.ccc/xxx, remove the `\` escape to have it work.
+ * Doesn't work with property files that have such escapes: key=https`\`://aaa.bbb.ccc/xxx, remove the `\` escape to have it work.
