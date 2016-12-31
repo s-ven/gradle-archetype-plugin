@@ -3,12 +3,19 @@ package com.orctom.gradle.archetype
 import com.orctom.gradle.archetype.util.ConsoleUtils
 import com.orctom.gradle.archetype.util.FileUtils
 import org.gradle.api.DefaultTask
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import static com.orctom.gradle.archetype.ConflictResolutionStrategy.*
+
+// import static com.orctom.gradle.archetype.ConflictResolutionStrategy.ASK
 class ArchetypeTask extends DefaultTask {
+
+  static final Logger log = Logging.getLogger(getClass().name)
 
   static File sourceDir
   static File targetDir
@@ -19,6 +26,10 @@ class ArchetypeTask extends DefaultTask {
     String projectGroup = getParam('group', 'Please enter the group name')
     String projectName = getParam('name', 'Please enter the project name')
     String projectVersion = getParam('version', 'Please enter the version name', '1.0-SNAPSHOT')
+
+    // String strategyString = getParam('strategy', 'Please enter conflict resolution strategy: s)weep / o)verwrite / a)sk / f)ail', 'fail');
+    String strategyString = getParam('strategy', 'Please enter conflict resolution strategy: s)weep / o)verwrite / f)ail', 'fail');
+    ConflictResolutionStrategy strategy = getStrategy(strategyString)
 
     sourceDir = new File(project.projectDir, System.getProperty('templates', 'src/main/resources/templates'))
 
@@ -46,7 +57,23 @@ class ArchetypeTask extends DefaultTask {
     Set<String> nonTemplates = FileUtils.getNonTemplates(defaultNonTemplates, sourceDir)
     List<File> templates = FileUtils.getTemplates(sourceDir)
 
-    FileUtils.generate(templates, binding, sourceDir, targetDir, nonTemplates)
+    FileUtils.generate(templates, binding, sourceDir, targetDir, nonTemplates, strategy)
+  }
+
+  private ConflictResolutionStrategy getStrategy(String strategyName) {
+
+    ConflictResolutionStrategy strategy = null;
+    if (strategyName.length() == 1) {
+      switch (strategyName) {
+        case 's': strategy = SWEEP; break;
+        case 'o': strategy = OVERWRITE; break;
+        //case 'a': strategy = ASK; break;
+        case 'f': strategy = FAIL; break;
+      }
+    } else {
+      strategy = ConflictResolutionStrategy.valueOf(strategyName.toUpperCase());
+    }
+    strategy
   }
 
 

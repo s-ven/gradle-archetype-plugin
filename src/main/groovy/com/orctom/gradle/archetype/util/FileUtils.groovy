@@ -1,11 +1,16 @@
 package com.orctom.gradle.archetype.util
 
+import com.orctom.gradle.archetype.ConflictResolutionStrategy
 import groovy.io.FileType
 import groovy.text.GStringTemplateEngine
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+import static com.orctom.gradle.archetype.ConflictResolutionStrategy.FAIL
+import static com.orctom.gradle.archetype.ConflictResolutionStrategy.OVERWRITE
 
 class FileUtils {
 
@@ -54,13 +59,12 @@ class FileUtils {
       Map binding,
       File sourceDir,
       File targetDir,
-      Set<String> nonTemplates) {
+      Set<String> nonTemplates,
+      ConflictResolutionStrategy strategy) {
 
     log.info("target dir: '{}'", targetDir.name)
 
-    // TODO: introduce variable to be able to disable default overwriting/deletion of existing targetDir,
-    // if the targetDir is not empty - possible values: never, ask, always
-    if (targetDir.exists()) {
+    if (targetDir.exists() && strategy == ConflictResolutionStrategy.SWEEP ) {
       log.warn("removing existing target dir: '{}'", targetDir.absolutePath)
       targetDir.deleteDir()
     }
@@ -69,44 +73,104 @@ class FileUtils {
 
     logBindings(binding)
 
+    // list of written files
+    // currently used only for cleaning up when there is a conflict and ConflictResolutionStrategy is FAIL
+    List<File> filesWritten = new ArrayList<>();
+
     templates.each {
       source ->
-      try {
+
+        // apply variable substitution to path
         File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
         String path = engine.createTemplate(target.path).make(binding)
         target = new File(path)
-        boolean isFile = source.isFile()
-        ensureParentDirs(target, isFile)
 
-        if (isFile) {
-          if (isNotTemplate(source.path, nonTemplates)) {
-            Files.copy(source.toPath(), target.toPath())
+        if (source.isFile()) {
+
+          // ensure ancestor dirs exist
+          target.mkdirs();
+
+          if (isNonTemplate(source, nonTemplates)) {
+            writeNonTemplate(target, source, strategy, filesWritten)
           } else {
-            try {
-              target << resolve(source.text, binding)
-            } catch (Exception ex) {
-              log.error("Failed to resolve variables in: '{}]", source.path)
-              log.error(ex.getMessage())
-              Files.copy(source.toPath(), target.toPath())
-            }
+            writeTemplate(target, source, strategy, binding, filesWritten)
           }
         }
-      } catch (Exception e) {
-        e.printStackTrace()
-      }
     }
 
     log.info('Done')
   }
 
-  static def logBindings(Map map) {
+  // handle templates
+  private static void writeTemplate(File target, File source, ConflictResolutionStrategy strategy,
+                                    Map binding, List<File> filesWritten ) {
+    try {
+
+      if (target.exists()) {
+        switch (strategy) {
+
+          case OVERWRITE:
+            log.info("Overwriting file '{}'.", target.absolutePath)
+            target.delete()
+            target << resolve(source.text, binding)
+            Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            break
+
+          case FAIL:
+            log.error("File already exists '{}'.", target.absolutePath)
+            log.info("Stopping the generation, deleting generated files.")
+            // remove generated files
+            filesWritten.each { file -> file.delete() }
+            System.exit(1)
+            break
+        }
+      } else {
+        target << resolve(source.text, binding)
+      }
+
+      filesWritten.add(target)
+
+    } catch (Exception ex) {
+      log.error("Failed to resolve variables in: '{}]", source.path)
+      log.error(ex.getMessage())
+      Files.copy(source.toPath(), target.toPath())
+    }
+  }
+
+  // handle non-templates
+  private static void writeNonTemplate(File target, File source, ConflictResolutionStrategy strategy, List<File> filesWritten ) {
+
+    if (target.exists()) {
+      switch (strategy) {
+
+        case OVERWRITE:
+          log.info("Overwriting file '{}'.", target.absolutePath)
+          Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+          break
+
+        case FAIL:
+          log.error("File already exists '{}'.", target.absolutePath)
+          log.info("Stopping the generation, deleting generated files.")
+          // remove generated files
+          filesWritten.each { file -> file.delete() }
+          System.exit(1)
+          break
+      }
+    } else {
+      Files.copy(source.toPath(), target.toPath())
+    }
+
+    filesWritten.add(target)
+  }
+
+  static logBindings(Map map) {
     map.each {
       k, v -> log.info("variable: {}='{}'", k, v)
     }
   }
 
-  static boolean isNotTemplate(String source, Set<String> nonTemplates) {
-    source in nonTemplates
+  static boolean isNonTemplate(File source, Set<String> nonTemplates) {
+    source.path in nonTemplates
   }
 
   static String resolve(String text, Map binding) {
@@ -121,14 +185,15 @@ class FileUtils {
     sourceDir.toURI().relativize(file.toURI()).toString()
   }
 
-  static String resolvePaths(String pathName) {
+  /** Applies variable substitution to provided path. */
+  static String resolvePaths(String pathAsString) {
 
-    if (!pathName.contains('__')) {
-      pathName
+    if (!pathAsString.contains('__')) {
+      pathAsString
     }
 
     String path = '';
-    pathName.split(File.separator).each {
+    pathAsString.split(File.separator).each {
       if (it.contains('__')) {
         path += resolvePath(it)
       } else {
@@ -141,16 +206,9 @@ class FileUtils {
     path
   }
 
-  // replaces __variable__ with ${variable}
+  // replaces "__variable__" (used in directory/file names) with "${variable}"
   static String resolvePath(String path) {
     path.replaceAll('(.*)__(\\w+)__(.*)', '$1\\$\\{$2\\}$3')
   }
 
-  static void ensureParentDirs(File file, boolean isFile) {
-    if (isFile) {
-      file.getParentFile().mkdirs();
-    } else {
-      file.mkdirs();
-    }
-  }
 }

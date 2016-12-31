@@ -7,15 +7,31 @@ Generating projects from local template.
 https://plugins.gradle.org/plugin/com.orctom.archetype
 
 ## Use
-### Interactive mode:
+
+### Interactive Mode:
 ```
 gradle generate
 ```
 
-### Batch mode:
+### Batch Mode:
 ```
 gradle generate -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
 ```
+
+### Settings in File
+
+To save answering the same question always the same or to save repeating the same command-line arguments, you
+can add the variables into `gradle settings`. Example:
+
+```
+systemProp.group=org.my
+systemProp.version=0.1-SNAPSHOT
+systemProp.strategy=fail
+```
+
+Just keep in mind, that system property set this way will not be not overridden on command line.
+
+## Settings
 
 ### Template Folder
 Default to: `src/main/resources/templates`
@@ -50,6 +66,16 @@ gradlew.bat
 
 Follows ant style. The tailing slash for directory is mandatory.
 
+### Conflict Resolution Strategy
+
+The strategy (from system property `strategy`) says what approach to take when a file exist in the target path:
+ 
+  * **sweep** - the target directory is deleted before the generation starts,
+   ensuring there won't be any conflicts
+  * **overwrite** - conflicting target file is overwritten
+  * **fail** - generation stops, all files generated so far are deleted, non-destructive, i.e. **recommended** 
+ 
+
 ### Variables:
 
 | name | description | sample |
@@ -61,9 +87,9 @@ Follows ant style. The tailing slash for directory is mandatory.
 | packageName | (group + name) replaced non-characters with '.' | com.xxx.yyy.dummy.app |
 | packagePath | replaced '.' with '/' in packageName | com/xxx/yyy/dummy/app |
 
-
-### Token
-`@variable@`
+### Token Format
+In code: `@variable@`
+In file name: `__variable__`
 
 ## Sample
 https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources/sample
