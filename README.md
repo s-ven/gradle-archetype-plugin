@@ -6,6 +6,13 @@ Generating projects from local template.
 ## Install
 https://plugins.gradle.org/plugin/com.orctom.archetype
 
+### Installation to Local Maven Repository
+
+```
+cd gradle-archetype-plugin
+./gradlew install -i
+```
+
 ## Use
 
 ### Interactive Mode:
