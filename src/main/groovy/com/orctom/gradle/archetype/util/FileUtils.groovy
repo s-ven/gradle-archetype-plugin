@@ -14,16 +14,17 @@ import static com.orctom.gradle.archetype.ConflictResolutionStrategy.OVERWRITE
 
 class FileUtils {
 
-  static final Logger log = Logging.getLogger(getClass().name)
+  static final Logger LOGGER = Logging.getLogger(FileUtils.class)
   static engine = new GStringTemplateEngine()
 
-  /** Provides collection of all files from the source directory.
+  /**
+   * Provides collection of all files from the source directory.
    *
    * @param sourceDir source directory, i.e. directory with the templates(s)
    * @return list of all files in the source directory, including sub-directories
    */
   static List<File> getTemplates(File sourceDir) {
-    log.info("source dir: '{}'", sourceDir.name)
+    LOGGER.info("source dir: '{}'", sourceDir.name)
 
     List<File> sourceFiles = []
     sourceDir.eachFileRecurse(FileType.ANY) { file ->
@@ -33,14 +34,15 @@ class FileUtils {
     sourceFiles
   }
 
-  /** Provides collection of all non-templates files from the source directory.
+  /**
+   * Provides collection of all non-templates files from the source directory.
    *
    * @param sourceDir source directory, i.e. directory with the templates(s)
    * @param defaultNonTemplatesFile location of the default non-templates files
    *
    * @return set of all non-templates files in the source directory, including sub-directories
    */
-  static Set<String> getNonTemplates(defaultNonTemplatesFile, sourceDir) {
+  static Set<String> getNonTemplates(defaultNonTemplatesFile, File sourceDir) {
     Set<String> nonTemplates = []
 
     // TODO: allow template-specific settings overriding the default
@@ -62,10 +64,10 @@ class FileUtils {
       Set<String> nonTemplates,
       ConflictResolutionStrategy strategy) {
 
-    log.info("target dir: '{}'", targetDir.name)
+    LOGGER.info("target dir: '{}'", targetDir.name)
 
-    if (targetDir.exists() && strategy == ConflictResolutionStrategy.SWEEP ) {
-      log.warn("removing existing target dir: '{}'", targetDir.absolutePath)
+    if (targetDir.exists() && strategy == ConflictResolutionStrategy.SWEEP) {
+      LOGGER.warn("removing existing target dir: '{}'", targetDir.absolutePath)
       targetDir.deleteDir()
     }
 
@@ -75,50 +77,50 @@ class FileUtils {
 
     // list of written files
     // currently used only for cleaning up when there is a conflict and ConflictResolutionStrategy is FAIL
-    List<File> filesWritten = new ArrayList<>();
+    List<File> filesWritten = new ArrayList<>()
 
-    templates.each {
-      source ->
+    templates.each { source ->
+      // apply variable substitution to path
+      File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
+      String path = engine.createTemplate(target.path).make(binding)
+      target = new File(path)
 
-        // apply variable substitution to path
-        File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
-        String path = engine.createTemplate(target.path).make(binding)
-        target = new File(path)
+      if (source.isFile()) {
 
-        if (source.isFile()) {
+        // ensure ancestor dirs exist
+        target.mkdirs()
 
-          // ensure ancestor dirs exist
-          target.mkdirs();
-
-          if (isNonTemplate(source, nonTemplates)) {
-            writeNonTemplate(target, source, strategy, filesWritten)
-          } else {
-            writeTemplate(target, source, strategy, binding, filesWritten)
-          }
+        if (isNonTemplate(source, nonTemplates)) {
+          writeNonTemplate(target, source, strategy, filesWritten)
+        } else {
+          writeTemplate(target, source, strategy, binding, filesWritten)
         }
+      }
     }
 
-    log.info('Done')
+    LOGGER.info('Done')
   }
 
   // handle templates
-  private static void writeTemplate(File target, File source, ConflictResolutionStrategy strategy,
-                                    Map binding, List<File> filesWritten ) {
+  private static void writeTemplate(File target,
+                                    File source,
+                                    ConflictResolutionStrategy strategy,
+                                    Map binding,
+                                    List<File> filesWritten) {
     try {
-
       if (target.exists()) {
         switch (strategy) {
 
           case OVERWRITE:
-            log.info("Overwriting file '{}'.", target.absolutePath)
+            LOGGER.info("Overwriting file '{}'.", target.absolutePath)
             target.delete()
             target << resolve(source.text, binding)
             Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
             break
 
           case FAIL:
-            log.error("File already exists '{}'.", target.absolutePath)
-            log.info("Stopping the generation, deleting generated files.")
+            LOGGER.error("File already exists '{}'.", target.absolutePath)
+            LOGGER.info("Stopping the generation, deleting generated files.")
             // remove generated files
             filesWritten.each { file -> file.delete() }
             System.exit(1)
@@ -131,26 +133,28 @@ class FileUtils {
       filesWritten.add(target)
 
     } catch (Exception ex) {
-      log.error("Failed to resolve variables in: '{}]", source.path)
-      log.error(ex.getMessage())
+      LOGGER.error("Failed to resolve variables in: '{}]", source.path)
+      LOGGER.error(ex.getMessage())
       Files.copy(source.toPath(), target.toPath())
     }
   }
 
   // handle non-templates
-  private static void writeNonTemplate(File target, File source, ConflictResolutionStrategy strategy, List<File> filesWritten ) {
-
+  private static void writeNonTemplate(File target,
+                                       File source,
+                                       ConflictResolutionStrategy strategy,
+                                       List<File> filesWritten) {
     if (target.exists()) {
       switch (strategy) {
 
         case OVERWRITE:
-          log.info("Overwriting file '{}'.", target.absolutePath)
+          LOGGER.info("Overwriting file '{}'.", target.absolutePath)
           Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
           break
 
         case FAIL:
-          log.error("File already exists '{}'.", target.absolutePath)
-          log.info("Stopping the generation, deleting generated files.")
+          LOGGER.error("File already exists '{}'.", target.absolutePath)
+          LOGGER.info("Stopping the generation, deleting generated files.")
           // remove generated files
           filesWritten.each { file -> file.delete() }
           System.exit(1)
@@ -165,7 +169,7 @@ class FileUtils {
 
   static logBindings(Map map) {
     map.each {
-      k, v -> log.info("variable: {}='{}'", k, v)
+      k, v -> LOGGER.info("variable: {}='{}'", k, v)
     }
   }
 
@@ -192,7 +196,7 @@ class FileUtils {
       pathAsString
     }
 
-    String path = '';
+    String path = ''
     pathAsString.split(File.separator).each {
       if (it.contains('__')) {
         path += resolvePath(it)

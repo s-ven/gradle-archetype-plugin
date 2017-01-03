@@ -23,5 +23,5 @@ enum ConflictResolutionStrategy {
      * Generation stops it when it encounters an existing file,
      * already generated files are removed.
      */
-    FAIL;
+    FAIL
 }

@@ -95,8 +95,8 @@ The strategy (from system property `strategy`) says what approach to take when a
 | packagePath | replaced '.' with '/' in packageName | com/xxx/yyy/dummy/app |
 
 ### Token Format
-In code: `@variable@`
-In file name: `__variable__`
+ * In code: `@variable@`
+ * In file name: `__variable__`
 
 ## Sample
 https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources/sample

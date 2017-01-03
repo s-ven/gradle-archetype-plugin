@@ -12,10 +12,9 @@ import java.nio.file.Paths
 
 import static com.orctom.gradle.archetype.ConflictResolutionStrategy.*
 
-// import static com.orctom.gradle.archetype.ConflictResolutionStrategy.ASK
 class ArchetypeTask extends DefaultTask {
 
-  static final Logger log = Logging.getLogger(getClass().name)
+  static final Logger LOGGER = Logging.getLogger(ArchetypeTask.class)
 
   static File sourceDir
   static File targetDir
@@ -27,31 +26,29 @@ class ArchetypeTask extends DefaultTask {
     String projectName = getParam('name', 'Please enter the project name')
     String projectVersion = getParam('version', 'Please enter the version name', '1.0-SNAPSHOT')
 
-    // String strategyString = getParam('strategy', 'Please enter conflict resolution strategy: s)weep / o)verwrite / a)sk / f)ail', 'fail');
-    String strategyString = getParam('strategy', 'Please enter conflict resolution strategy: s)weep / o)verwrite / f)ail', 'fail');
+    String strategyString = getParam('strategy', 'Please enter conflict resolution strategy: s)weep / o)verwrite / f)ail', 'fail')
     ConflictResolutionStrategy strategy = getStrategy(strategyString)
 
     sourceDir = new File(project.projectDir, System.getProperty('templates', 'src/main/resources/templates'))
 
     def targetDirPath = getParam('target', 'Please enter the target folder name where the generated project locates', 'generated')
     targetDir = new File(targetDirPath)
-    if (!Paths.get(targetDirPath).absolute) {
-      // relative paths are considered to be relative to the project directory
+    if (!Paths.get(targetDirPath).absolute) {// relative path to project root
       targetDir = new File(project.projectDir, targetDirPath)
     }
 
     Map binding = [
-        'group': projectGroup,
-        'groupId': projectGroup,
-        'name': projectName,
-        'projectName': projectName,
-        'artifactId': projectName,
-        'version': projectVersion,
+        'group'          : projectGroup,
+        'groupId'        : projectGroup,
+        'name'           : projectName,
+        'projectName'    : projectName,
+        'artifactId'     : projectName,
+        'version'        : projectVersion,
         'project.version': projectVersion
     ]
     extendedBinding(binding)
 
-    Path defaultNonTemplatesPath = Paths.get(project.projectDir.absolutePath, 'src','main','resources','.nontemplates')
+    Path defaultNonTemplatesPath = Paths.get(project.projectDir.absolutePath, 'src', 'main', 'resources', '.nontemplates')
     File defaultNonTemplates = defaultNonTemplatesPath.toFile()
 
     Set<String> nonTemplates = FileUtils.getNonTemplates(defaultNonTemplates, sourceDir)
@@ -60,25 +57,22 @@ class ArchetypeTask extends DefaultTask {
     FileUtils.generate(templates, binding, sourceDir, targetDir, nonTemplates, strategy)
   }
 
-  private ConflictResolutionStrategy getStrategy(String strategyName) {
-
-    ConflictResolutionStrategy strategy = null;
+  private static ConflictResolutionStrategy getStrategy(String strategyName) {
     if (strategyName.length() == 1) {
       switch (strategyName) {
-        case 's': strategy = SWEEP; break;
-        case 'o': strategy = OVERWRITE; break;
-        //case 'a': strategy = ASK; break;
-        case 'f': strategy = FAIL; break;
+        case 's': return SWEEP
+        case 'o': return OVERWRITE
+      //case 'a': return ASK
+        case 'f': return FAIL
+        default: return FAIL
       }
     } else {
-      strategy = ConflictResolutionStrategy.valueOf(strategyName.toUpperCase());
+      valueOf(strategyName.toUpperCase())
     }
-    strategy
   }
 
 
   static void extendedBinding(Map binding) {
-
     String packageName = binding.get('group') + '/' + binding.get('name')
     String normalizedPackageName = packageName.replaceAll('//', '/')
 
@@ -90,7 +84,7 @@ class ArchetypeTask extends DefaultTask {
     if (null != extraProperties) {
       extraProperties.split('\\s+').each { item ->
         int equalSignIndex
-        if (item.startsWith("-D") && ( equalSignIndex = item.indexOf('=')) > 2) {
+        if (item.startsWith("-D") && (equalSignIndex = item.indexOf('=')) > 2) {
           String key = item.substring(2, equalSignIndex)
           String value = item.substring(equalSignIndex + 1, item.length())
           binding.put(key, value)
@@ -99,7 +93,8 @@ class ArchetypeTask extends DefaultTask {
     }
   }
 
-  /** Gets value of single a plugin parameter.
+  /**
+   * Gets value of single a plugin parameter.
    *  The value is get from:
    *  <ol>
    *      <li>system property</il>
@@ -113,7 +108,6 @@ class ArchetypeTask extends DefaultTask {
    * @return parameter's value
    */
   static String getParam(String paramName, String prompt, String defaultValue = null) {
-
     String value = System.getProperty(paramName)
 
     if (!value) {
