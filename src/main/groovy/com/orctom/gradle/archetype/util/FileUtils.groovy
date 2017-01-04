@@ -8,6 +8,7 @@ import org.gradle.api.logging.Logging
 
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.regex.Matcher
 
 import static com.orctom.gradle.archetype.ConflictResolutionStrategy.FAIL
 import static com.orctom.gradle.archetype.ConflictResolutionStrategy.OVERWRITE
@@ -79,23 +80,26 @@ class FileUtils {
     // currently used only for cleaning up when there is a conflict and ConflictResolutionStrategy is FAIL
     List<File> filesWritten = new ArrayList<>()
 
-    templates.each { source ->
-      // apply variable substitution to path
-      File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
-      String path = engine.createTemplate(target.path).make(binding)
-      target = new File(path)
+    templates.each {
+      source ->
 
-      if (source.isFile()) {
+        // apply variable substitution to path
+        File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
+        String quotedPath = target.path.replaceAll() // TODO : replace delimiters with esacped ones
+        String path = engine.createTemplate(Matcher.quoteReplacement(target.path)).make(binding)
+        target = new File(path)
 
-        // ensure ancestor dirs exist
-        target.mkdirs()
+        if (source.isFile()) {
 
-        if (isNonTemplate(source, nonTemplates)) {
-          writeNonTemplate(target, source, strategy, filesWritten)
-        } else {
-          writeTemplate(target, source, strategy, binding, filesWritten)
+          // ensure ancestor dirs exist
+          target.mkdirs()
+
+          if (isNonTemplate(source, nonTemplates)) {
+            writeNonTemplate(target, source, strategy, filesWritten)
+          } else {
+            writeTemplate(target, source, strategy, binding, filesWritten)
+          }
         }
-      }
     }
 
     LOGGER.info('Done')
@@ -108,6 +112,7 @@ class FileUtils {
                                     Map binding,
                                     List<File> filesWritten) {
     try {
+
       if (target.exists()) {
         switch (strategy) {
 
@@ -197,7 +202,7 @@ class FileUtils {
     }
 
     String path = ''
-    pathAsString.split(File.separator).each {
+    pathAsString.split(Matcher.quoteReplacement(File.separator)).each {
       if (it.contains('__')) {
         path += resolvePath(it)
       } else {
