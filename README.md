@@ -91,6 +91,7 @@ The strategy (from system property `strategy`) says what approach to take when a
 | name  | project.name  | dummy-app |
 | version | project.version | 1.0-SNAPSHOT |
 | projectName | project.name | dummy-app |
+| groupPath | replaced '.' with '/' in group | com/xxx/yyy |
 | packageName | (group + name) replaced non-characters with '.' | com.xxx.yyy.dummy.app |
 | packagePath | replaced '.' with '/' in packageName | com/xxx/yyy/dummy/app |
 
