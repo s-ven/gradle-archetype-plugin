@@ -7,7 +7,10 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.util.regex.Matcher
 
 import static com.orctom.gradle.archetype.ConflictResolutionStrategy.FAIL
 import static com.orctom.gradle.archetype.ConflictResolutionStrategy.OVERWRITE
@@ -79,23 +82,29 @@ class FileUtils {
     // currently used only for cleaning up when there is a conflict and ConflictResolutionStrategy is FAIL
     List<File> filesWritten = new ArrayList<>()
 
-    templates.each { source ->
-      // apply variable substitution to path
-      File target = new File(targetDir, resolvePaths(getRelativePath(sourceDir, source)))
-      String path = engine.createTemplate(target.path).make(binding)
-      target = new File(path)
+    Path sourceDirPath = sourceDir.toPath();
+    templates.each {
+      source ->
 
-      if (source.isFile()) {
+        // apply variable substitution to path
+        Path sourcePath = sourceDirPath.relativize(source.toPath())
+        File target = new File(targetDir, resolvePaths(sourceDirPath, sourcePath))
+        String quotedPath = target.path.replace(File.separator,Matcher.quoteReplacement(File.separator))
 
-        // ensure ancestor dirs exist
-        target.mkdirs()
+        String path = engine.createTemplate(quotedPath).make(binding)
+        target = new File(path)
 
-        if (isNonTemplate(source, nonTemplates)) {
-          writeNonTemplate(target, source, strategy, filesWritten)
-        } else {
-          writeTemplate(target, source, strategy, binding, filesWritten)
+        if (source.isFile()) {
+
+          // ensure ancestor dirs exist
+          target.parentFile.mkdirs()
+
+          if (isNonTemplate(source, nonTemplates)) {
+            writeNonTemplate(target, source, strategy, filesWritten)
+          } else {
+            writeTemplate(target, source, strategy, binding, filesWritten)
+          }
         }
-      }
     }
 
     LOGGER.info('Done')
@@ -108,6 +117,8 @@ class FileUtils {
                                     Map binding,
                                     List<File> filesWritten) {
     try {
+
+      LOGGER.debug("TEMPLATE: " + source.toString() + " -> " + target.toString())
       if (target.exists()) {
         switch (strategy) {
 
@@ -122,7 +133,7 @@ class FileUtils {
             LOGGER.error("File already exists '{}'.", target.absolutePath)
             LOGGER.info("Stopping the generation, deleting generated files.")
             // remove generated files
-            filesWritten.each { file -> file.delete() }
+            deleteFiles(filesWritten)
             System.exit(1)
             break
         }
@@ -136,6 +147,14 @@ class FileUtils {
       LOGGER.error("Failed to resolve variables in: '{}]", source.path)
       LOGGER.error(ex.getMessage())
       Files.copy(source.toPath(), target.toPath())
+    }
+  }
+
+  private static List<File> deleteFiles(List<File> filesWritten) {
+    filesWritten.each {
+      file ->
+        file.delete()
+        LOGGER.debug("DELETING: " + file.toString())
     }
   }
 
@@ -155,8 +174,7 @@ class FileUtils {
         case FAIL:
           LOGGER.error("File already exists '{}'.", target.absolutePath)
           LOGGER.info("Stopping the generation, deleting generated files.")
-          // remove generated files
-          filesWritten.each { file -> file.delete() }
+          deleteFiles(filesWritten)
           System.exit(1)
           break
       }
@@ -190,24 +208,23 @@ class FileUtils {
   }
 
   /** Applies variable substitution to provided path. */
-  static String resolvePaths(String pathAsString) {
+  static String resolvePaths(Path sourceDirPath, Path path) {
 
-    if (!pathAsString.contains('__')) {
-      pathAsString
+    if (!path.toString().contains('__')) {
+      path.toString()
     }
 
-    String path = ''
-    pathAsString.split(File.separator).each {
-      if (it.contains('__')) {
-        path += resolvePath(it)
-      } else {
-        path += it
-      }
-
-      path += File.separator
+    List<String> pathComponents = new ArrayList<>();
+    path.each {
+      pathComponents.add(resolvePath(it.toString()))
     }
 
-    path
+    if (pathComponents.size() == 1) {
+      Paths.get(pathComponents.get(0))
+    }
+    else {
+      Paths.get(pathComponents[0], pathComponents.subList(1, pathComponents.size()).toArray(new String[0])).toString()
+    }
   }
 
   // replaces "__variable__" (used in directory/file names) with "${variable}"
