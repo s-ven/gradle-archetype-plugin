@@ -12,12 +12,12 @@ https://plugins.gradle.org/plugin/com.orctom.archetype
 
 ### Interactive Mode:
 ```
-gradle clean generate
+gradle clean generate -i
 ```
 
 ### Batch Mode:
 ```
-gradle clean generate -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
+gradle clean generate -i -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
 ```
 
 ### Parameters
@@ -105,4 +105,4 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * The target folder where the generated project(s) locates is not changeable, fixed to `generated`.
  * The generation will fail by default, if there are files with the same name exist in the `generated` folder.
  * Added `clean` task that will have `generated` folder recreated.
- *
+ * Changed `print` and `println` to logger, so please append `-i` args to have the log printed out.
