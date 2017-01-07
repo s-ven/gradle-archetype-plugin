@@ -30,7 +30,7 @@ Following parameters will be asked, if not available in system properties
 | name            | name in Gradle, of artifactId in Maven, *Mandatory* |                                |
 | version         | version in Gradle or Maven, *Mandatory*             | 1.0-SNAPSHOT                   |
 
-#### Not Be Prompted
+#### Won't Be Prompted
 Following parameters will NOT be prompted, if not available in system properties.
 
 | Param           | Description                                         | Default                        |
@@ -73,7 +73,8 @@ Fixed to: `generated`.
 
 ### Non-templates:
 Files that will not be resoled by variables, as they would fail if tried to resolve.
-Put the non-template lists to `src/main/resources/.nontemplates`.
+Put the non-template lists to `.nontemplates` file,
+and put the file to template folder (such as `src/main/resources/templates`) or `src/main/resources/`.
 
 Sample:
 ```
