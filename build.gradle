@@ -35,9 +35,3 @@ pluginBundle {
     }
   }
 }
-
-
-allprojects {
-  apply plugin: 'maven'
-  group = 'gradle.plugin.com.orctom.gradle'
-}

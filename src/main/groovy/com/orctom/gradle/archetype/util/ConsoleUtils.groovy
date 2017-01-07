@@ -8,13 +8,13 @@ class ConsoleUtils {
 
     def msg = "$PS1$message: " + (defaultValue ? "[$defaultValue]" : "")
 
-    if (System.console()) {
-      return System.console().readLine(msg) ?: String.valueOf(defaultValue)
+    def console = System.console()
+    if (console) {
+      return console.readLine(msg) ?: String.valueOf(defaultValue)
     } else {
       Scanner scanner = new Scanner(System.in)
-      print "$msg"
+      println "$msg"
       return scanner.nextLine() ?: String.valueOf(defaultValue)
     }
   }
-
 }

@@ -1,4 +1,4 @@
-package@packageName @.resource;
+package @packageName@.resource;
 
   import javax.annotation.PostConstruct;
   import javax.annotation.PreDestroy;
@@ -15,9 +15,9 @@ package@packageName @.resource;
   import com.officedepot.servicecore.model.CoreServiceResponse;
   import com.officedepot.servicecore.resource.AbstractBaseController;
 
-  import@packageName @.model.ExampleTO;
-  import@packageName @.model.ExampleRequest;
-  import@packageName @.service.ExampleServiceGetApi;
+  import @packageName@.model.ExampleTO;
+  import @packageName@.model.ExampleRequest;
+  import @packageName@.service.ExampleServiceGetApi;
 
   import io.swagger.annotations.Api;
   import io.swagger.annotations.ApiOperation;

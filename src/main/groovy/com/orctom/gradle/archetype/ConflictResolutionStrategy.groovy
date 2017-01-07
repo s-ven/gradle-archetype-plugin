@@ -6,22 +6,22 @@ package com.orctom.gradle.archetype
  */
 enum ConflictResolutionStrategy {
 
-    /** Target directory is deleted and re-created before project generation starts. */
-    SWEEP,
+  /** Target directory is deleted and re-created before project generation starts. */
+  SWEEP,
 
-    /** Existing files are rewritten, existing directories ignored. */
-    OVERWRITE,
+  /** Existing files are rewritten, existing directories ignored. */
+      OVERWRITE,
 
-    // TODO, only for interactive work
-    /**
-     * User is asked if the existing file should be rewritten or not - yes/no/merge/abort.
-     * Merge is provided only when a merge tool is set via system property mergeTool.
-     */
-    //ASK,
+  // TODO, only for interactive work
+      /**
+       * User is asked if the existing file should be rewritten or not - yes/no/merge/abort.
+       * Merge is provided only when a merge tool is set via system property mergeTool.
+       */
+      //ASK,
 
-    /**
-     * Generation stops it when it encounters an existing file,
-     * already generated files are removed.
-     */
-    FAIL
+      /**
+       * Generation stops it when it encounters an existing file,
+       * already generated files are removed.
+       */
+      FAIL
 }

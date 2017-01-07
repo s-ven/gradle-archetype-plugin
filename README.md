@@ -1,58 +1,78 @@
-# gradle-archetype-plugin
+## gradle-archetype-plugin
 
 Maven archetype like plugin for Gradle.
 Generating projects from local template.
 
-## Install
+### Install
 https://plugins.gradle.org/plugin/com.orctom.archetype
 
-### Installation to Local Maven Repository
-
-```
-cd gradle-archetype-plugin
-./gradlew install -i
-```
-
-## Use
+### Tasks
+ * `clean`: cleans the generated folders and files.
+ * `generate`: generates projects from the template.
 
 ### Interactive Mode:
 ```
-gradle generate
+gradle clean generate
 ```
 
 ### Batch Mode:
 ```
-gradle generate -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
+gradle clean generate -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
 ```
 
-### Settings in File
+### Parameters
+#### Prompted
+Following parameters will be asked, if not available in system properties
 
-To save answering the same question always the same or to save repeating the same command-line arguments, you
-can add the variables into `gradle settings`. Example:
+| Param           | Description                                         | Default                        |
+| --------------- | ----------------------------------------------------| ------------------------------ |
+| group           | group name in Gradle or Maven, *Mandatory*          |                                |
+| name            | name in Gradle, of artifactId in Maven, *Mandatory* |                                |
+| version         | version in Gradle or Maven, *Mandatory*             | 1.0-SNAPSHOT                   |
 
+#### Not Be Prompted
+Following parameters will NOT be prompted, if not available in system properties.
+
+| Param           | Description                                         | Default                        |
+| --------------- | ----------------------------------------------------| ------------------------------ |
+| templates       | The folder path where template locates, *Mandatory* | `src/main/resources/templates` |
+| failIfFileExist | Fail if there are files with the same name exist in the `generated` folder; otherwise overwrite | `true` |
+
+#### System Properties
+Parameters will firstly been searched in System Properties, which includes:
+
+ * gradle.properties: systemProp.param1=value1
+ * settings.properties: systemProp.param1=value1
+ * ~/.gradle/gradle.properties (not suggested for this plugin)
+ * Command line: -Dparam1=value1 -Dparam2=value2 -Dparam3=value3
+
+### Variables:
+Variables that can be used in template files.
+
+| name        | description                                        | sample                |
+| ----------- | -------------------------------------------------- | --------------------- |
+| group       | project.group                                      | com.xxx.yyy           |
+| name        | project.name                                       | dummy-app             |
+| version     | project.version                                    | 1.0-SNAPSHOT          |
+| projectName | project.name                                       | dummy-app             |
+| groupPath   | replaced '.' with '/' in group                     | com/xxx/yyy           |
+| packageName | (group + name) replaced non-characters with '.'    | com.xxx.yyy.dummy.app |
+| packagePath | replaced '.' with '/' in packageName               | com/xxx/yyy/dummy/app |
+
+Extra variables can be added in command line:
 ```
-systemProp.group=org.my
-systemProp.version=0.1-SNAPSHOT
-systemProp.strategy=fail
+-Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...
 ```
 
-Just keep in mind, that system property set this way will not be not overridden on command line.
-
-## Settings
-
-### Template Folder
-Default to: `src/main/resources/templates`
-
-Can be overridden by `-Dtemplates=your-template-folder`
+### Token Format
+ * In code: `@variable@`
+ * In file name: `__variable__`
 
 ### Generated Project(s) Folder
-Default to: `generated`
-Will recreate this folder on every run.
-
-Can be override by `-Dtarget=folder-name`
+Fixed to: `generated`.
 
 ### Non-templates:
-Files that will not be resoled by variables, as they would fail if try to resolve.
+Files that will not be resoled by variables, as they would fail if tried to resolve.
 Put the non-template lists to `src/main/resources/.nontemplates`.
 
 Sample:
@@ -71,36 +91,18 @@ gradlew
 gradlew.bat
 ```
 
-Follows ant style. The tailing slash for directory is mandatory.
+It follows ant style. The tailing slash for directory is mandatory.
 
-### Conflict Resolution Strategy
-
-The strategy (from system property `strategy`) says what approach to take when a file exist in the target path:
- 
-  * **sweep** - the target directory is deleted before the generation starts,
-   ensuring there won't be any conflicts
-  * **overwrite** - conflicting target file is overwritten
-  * **fail** - generation stops, all files generated so far are deleted, non-destructive, i.e. **recommended** 
- 
-
-### Variables:
-
-| name | description | sample |
-| ---- | ----------- | ------ |
-| group | project.group | com.xxx.yyy |
-| name  | project.name  | dummy-app |
-| version | project.version | 1.0-SNAPSHOT |
-| projectName | project.name | dummy-app |
-| groupPath | replaced '.' with '/' in group | com/xxx/yyy |
-| packageName | (group + name) replaced non-characters with '.' | com.xxx.yyy.dummy.app |
-| packagePath | replaced '.' with '/' in packageName | com/xxx/yyy/dummy/app |
-
-### Token Format
- * In code: `@variable@`
- * In file name: `__variable__`
-
-## Sample
+### Sample
 https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources/sample
 
-## Known Issues
+### Known Issues
  * Doesn't work with property files that have such escapes: key=https`\`://aaa.bbb.ccc/xxx, remove the `\` escape to have it work.
+ * In interactive mode, the prompt text got truncated sometimes.
+
+### Change Logs
+#### 1.3
+ * The target folder where the generated project(s) locates is not changeable, fixed to `generated`.
+ * The generation will fail by default, if there are files with the same name exist in the `generated` folder.
+ * Added `clean` task that will have `generated` folder recreated.
+ *

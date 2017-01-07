@@ -1,4 +1,4 @@
-package@packageName @.service;
+package @packageName@.service;
 
   import static org.junit.Assert.assertTrue;
 

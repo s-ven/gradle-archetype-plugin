@@ -1,4 +1,4 @@
-package@packageName @.service;
+package @packageName@.service;
 
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
@@ -11,8 +11,8 @@ package@packageName @.service;
   import com.officedepot.servicecore.model.CoreServiceResponse;
   import com.officedepot.servicecore.service.AbstractBaseService;
 
-  import@packageName @.model.ExampleRequest;
-  import@packageName @.model.ExampleTO;
+  import @packageName@.model.ExampleRequest;
+  import @packageName@.model.ExampleTO;
 
 /**
  * It is required to create a new Service Class for each API. APIs can be grouped to use the same threadpool provided by Hystrix.

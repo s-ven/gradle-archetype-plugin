@@ -1,6 +1,5 @@
 package com.orctom.gradle.archetype.util
 
-import com.orctom.gradle.archetype.ConflictResolutionStrategy
 import groovy.io.FileType
 import groovy.text.GStringTemplateEngine
 import org.gradle.api.logging.Logger
@@ -12,182 +11,127 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.regex.Matcher
 
-import static com.orctom.gradle.archetype.ConflictResolutionStrategy.FAIL
-import static com.orctom.gradle.archetype.ConflictResolutionStrategy.OVERWRITE
-
 class FileUtils {
 
   static final Logger LOGGER = Logging.getLogger(FileUtils.class)
+
   static engine = new GStringTemplateEngine()
 
-  /**
-   * Provides collection of all files from the source directory.
-   *
-   * @param sourceDir source directory, i.e. directory with the templates(s)
-   * @return list of all files in the source directory, including sub-directories
-   */
-  static List<File> getTemplates(File sourceDir) {
-    LOGGER.info("source dir: '{}'", sourceDir.name)
+  private static File getResourceFile(File projectDir, String path) {
+    if (Paths.get(path).absolute) {
+      return new File(path)
+    }
+    new File(projectDir, path)
+  }
+
+  private static List<File> getTemplates(File templateDir) {
+    LOGGER.info('Using template in: {}', templateDir.path)
 
     List<File> sourceFiles = []
-    sourceDir.eachFileRecurse(FileType.ANY) { file ->
+    templateDir.eachFileRecurse(FileType.ANY) { file ->
       sourceFiles << file
     }
 
     sourceFiles
   }
 
-  /**
-   * Provides collection of all non-templates files from the source directory.
-   *
-   * @param sourceDir source directory, i.e. directory with the templates(s)
-   * @param defaultNonTemplatesFile location of the default non-templates files
-   *
-   * @return set of all non-templates files in the source directory, including sub-directories
-   */
-  static Set<String> getNonTemplates(defaultNonTemplatesFile, File sourceDir) {
+  private static Set<String> getNonTemplates(File projectDir, File templateDir) {
+    File templateSpecificNonTemplatesFile = new File(templateDir, '.nontemplates')
+    if (templateSpecificNonTemplatesFile.exists()) {
+      return readNonTemplates(templateDir.path, templateSpecificNonTemplatesFile)
+    }
+
+    File defaultNonTemplatesFile = new File(projectDir, 'src/main/resources/.nontemplates')
+    if (defaultNonTemplatesFile.exists()) {
+      return readNonTemplates(templateDir.path, defaultNonTemplatesFile)
+    }
+
+    return []
+  }
+
+  private static Set<String> readNonTemplates(String templateDirPath, File nonTemplatesFile) {
+    LOGGER.info('Using non-template list in file: {}', nonTemplatesFile)
     Set<String> nonTemplates = []
 
-    // TODO: allow template-specific settings overriding the default
-    Set<String> nonTemplatesWildcards = defaultNonTemplatesFile.readLines() as Set
+    Set<String> nonTemplatesWildcards = nonTemplatesFile.readLines() as Set
     FileNameFinder finder = new FileNameFinder()
     nonTemplatesWildcards.each {
-      def files = finder.getFileNames(sourceDir.path, it)
+      def files = finder.getFileNames(templateDirPath, it)
       nonTemplates.addAll(files)
     }
 
     nonTemplates
   }
 
-  static void generate(
-      List<File> templates,
-      Map binding,
-      File sourceDir,
-      File targetDir,
-      Set<String> nonTemplates,
-      ConflictResolutionStrategy strategy) {
-
-    LOGGER.info("target dir: '{}'", targetDir.name)
-
-    if (targetDir.exists() && strategy == ConflictResolutionStrategy.SWEEP) {
-      LOGGER.warn("removing existing target dir: '{}'", targetDir.absolutePath)
-      targetDir.deleteDir()
-    }
+  static void generate(File projectDir, String templatePath, Map binding, boolean failIfFileExist) {
+    File templateDir = getResourceFile(projectDir, templatePath)
+    List<File> templates = getTemplates(templateDir)
+    File targetDir = getResourceFile(projectDir, 'generated')
+    Set<String> nonTemplates = getNonTemplates(projectDir, templateDir)
 
     targetDir.mkdirs()
 
-    logBindings(binding)
+    List<File> generatedFiles = []
+    Path sourceDirPath = templateDir.toPath()
+    templates.each { source ->
+      File target = getTargetFile(sourceDirPath, targetDir, source, binding)
+      if (source.isDirectory()) {
+        return
+      }
 
-    // list of written files
-    // currently used only for cleaning up when there is a conflict and ConflictResolutionStrategy is FAIL
-    List<File> filesWritten = new ArrayList<>()
+      LOGGER.debug('Processing {} -> {}', source, target)
 
-    Path sourceDirPath = sourceDir.toPath();
-    templates.each {
-      source ->
+      failTheBuildIfFileExist(target, failIfFileExist, generatedFiles)
 
-        // apply variable substitution to path
-        Path sourcePath = sourceDirPath.relativize(source.toPath())
-        File target = new File(targetDir, resolvePaths(sourceDirPath, sourcePath))
-        String quotedPath = target.path.replace(File.separator,Matcher.quoteReplacement(File.separator))
+      target.parentFile.mkdirs()
 
-        String path = engine.createTemplate(quotedPath).make(binding)
-        target = new File(path)
-
-        if (source.isFile()) {
-
-          // ensure ancestor dirs exist
-          target.parentFile.mkdirs()
-
-          if (isNonTemplate(source, nonTemplates)) {
-            writeNonTemplate(target, source, strategy, filesWritten)
-          } else {
-            writeTemplate(target, source, strategy, binding, filesWritten)
-          }
-        }
+      if (isNonTemplate(source, nonTemplates)) {
+        generateFromNonTemplate(source, target)
+      } else {
+        generateFromTemplate(source, target, binding)
+      }
+      generatedFiles.add(target)
     }
 
     LOGGER.info('Done')
   }
 
-  // handle templates
-  private static void writeTemplate(File target,
-                                    File source,
-                                    ConflictResolutionStrategy strategy,
-                                    Map binding,
-                                    List<File> filesWritten) {
+  private static void failTheBuildIfFileExist(File target, boolean failIfFileExist, List<File> generatedFiles) {
+    if (target.exists() && failIfFileExist) {
+      LOGGER.error("File already exists '{}'.", target.absolutePath)
+      LOGGER.info("Stopping the generation, deleting generated files.")
+      deleteNewlyGeneratedFiles(generatedFiles)
+      throw new RuntimeException("failIfFileExist=true and the target file already exists.")
+    }
+  }
+
+  private static File getTargetFile(Path sourceDirPath, File targetDir, File source, Map binding) {
+    Path sourcePath = sourceDirPath.relativize(source.toPath())
+    String rawTargetPath = new File(targetDir, resolvePaths(sourcePath)).path
+    String quotedRawTargetPath = rawTargetPath.replace(File.separator, Matcher.quoteReplacement(File.separator))
+    String resolvedTargetPath = engine.createTemplate(quotedRawTargetPath).make(binding)
+    new File(resolvedTargetPath)
+  }
+
+  private static void generateFromNonTemplate(File source, File target) {
+    Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+  }
+
+  private static void generateFromTemplate(File source, File target, Map binding) {
     try {
-
-      LOGGER.debug("TEMPLATE: " + source.toString() + " -> " + target.toString())
-      if (target.exists()) {
-        switch (strategy) {
-
-          case OVERWRITE:
-            LOGGER.info("Overwriting file '{}'.", target.absolutePath)
-            target.delete()
-            target << resolve(source.text, binding)
-            Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            break
-
-          case FAIL:
-            LOGGER.error("File already exists '{}'.", target.absolutePath)
-            LOGGER.info("Stopping the generation, deleting generated files.")
-            // remove generated files
-            deleteFiles(filesWritten)
-            System.exit(1)
-            break
-        }
-      } else {
-        target << resolve(source.text, binding)
-      }
-
-      filesWritten.add(target)
-
-    } catch (Exception ex) {
+      target.delete()
+      target << resolve(source.text, binding)
+    } catch (Exception e) {
       LOGGER.error("Failed to resolve variables in: '{}]", source.path)
-      LOGGER.error(ex.getMessage())
+      LOGGER.error(e.getMessage())
       Files.copy(source.toPath(), target.toPath())
     }
   }
 
-  private static List<File> deleteFiles(List<File> filesWritten) {
-    filesWritten.each {
-      file ->
-        file.delete()
-        LOGGER.debug("DELETING: " + file.toString())
-    }
-  }
-
-  // handle non-templates
-  private static void writeNonTemplate(File target,
-                                       File source,
-                                       ConflictResolutionStrategy strategy,
-                                       List<File> filesWritten) {
-    if (target.exists()) {
-      switch (strategy) {
-
-        case OVERWRITE:
-          LOGGER.info("Overwriting file '{}'.", target.absolutePath)
-          Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
-          break
-
-        case FAIL:
-          LOGGER.error("File already exists '{}'.", target.absolutePath)
-          LOGGER.info("Stopping the generation, deleting generated files.")
-          deleteFiles(filesWritten)
-          System.exit(1)
-          break
-      }
-    } else {
-      Files.copy(source.toPath(), target.toPath())
-    }
-
-    filesWritten.add(target)
-  }
-
-  static logBindings(Map map) {
-    map.each {
-      k, v -> LOGGER.info("variable: {}='{}'", k, v)
+  private static List<File> deleteNewlyGeneratedFiles(List<File> generatedFiles) {
+    generatedFiles.each { file ->
+      file.delete()
+      LOGGER.debug("Deleted: {}", file)
     }
   }
 
@@ -203,28 +147,15 @@ class FileUtils {
     done
   }
 
-  static String getRelativePath(File sourceDir, File file) {
-    sourceDir.toURI().relativize(file.toURI()).toString()
-  }
-
-  /** Applies variable substitution to provided path. */
-  static String resolvePaths(Path sourceDirPath, Path path) {
-
+  // Applies variable substitution to provided path.
+  static String resolvePaths(Path path) {
     if (!path.toString().contains('__')) {
       path.toString()
     }
 
-    List<String> pathComponents = new ArrayList<>();
-    path.each {
-      pathComponents.add(resolvePath(it.toString()))
-    }
-
-    if (pathComponents.size() == 1) {
-      Paths.get(pathComponents.get(0))
-    }
-    else {
-      Paths.get(pathComponents[0], pathComponents.subList(1, pathComponents.size()).toArray(new String[0])).toString()
-    }
+    path.collect {
+      resolvePath(it.toString())
+    }.join(File.separator)
   }
 
   // replaces "__variable__" (used in directory/file names) with "${variable}"

@@ -10,13 +10,10 @@ buildscript {
   }
 }
 
-apply plugin: "com.orctom.applyscript"
-applyscript 'com.officedepot.gradle:gradle-scripts:1.1/od.gradle'
-
 allprojects {
   repositories {
     mavenLocal()
-    maven { url "http://nexus.uschecomrnd.net/content/groups/public/" }
+    mavenCentral()
   }
 }
 
