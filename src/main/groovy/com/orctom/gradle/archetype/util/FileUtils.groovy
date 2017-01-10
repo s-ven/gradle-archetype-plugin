@@ -1,5 +1,6 @@
 package com.orctom.gradle.archetype.util
 
+import com.orctom.gradle.archetype.ArchetypePlugin
 import groovy.io.FileType
 import groovy.text.GStringTemplateEngine
 import org.gradle.api.logging.Logger
@@ -9,7 +10,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import java.util.regex.Matcher
 
 class FileUtils {
 
@@ -66,7 +66,7 @@ class FileUtils {
   static void generate(File projectDir, String templatePath, Map binding, boolean failIfFileExist) {
     File templateDir = getResourceFile(projectDir, templatePath)
     List<File> templates = getTemplates(templateDir)
-    File targetDir = getResourceFile(projectDir, 'generated')
+    File targetDir = getResourceFile(projectDir, ArchetypePlugin.DIR_TARGET)
     Set<String> nonTemplates = getNonTemplates(projectDir, templateDir)
 
     targetDir.mkdirs()
@@ -108,8 +108,7 @@ class FileUtils {
   private static File getTargetFile(Path sourceDirPath, File targetDir, File source, Map binding) {
     Path sourcePath = sourceDirPath.relativize(source.toPath())
     String rawTargetPath = new File(targetDir, resolvePaths(sourcePath)).path
-    String quotedRawTargetPath = rawTargetPath.replace(File.separator, Matcher.quoteReplacement(File.separator))
-    String resolvedTargetPath = engine.createTemplate(quotedRawTargetPath).make(binding)
+    String resolvedTargetPath = engine.createTemplate(rawTargetPath).make(binding)
     new File(resolvedTargetPath)
   }
 

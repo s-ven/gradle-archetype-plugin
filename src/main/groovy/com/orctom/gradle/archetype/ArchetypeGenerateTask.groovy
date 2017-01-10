@@ -7,8 +7,6 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
-import java.util.regex.Matcher
-
 class ArchetypeGenerateTask extends DefaultTask {
 
   static final Logger LOGGER = Logging.getLogger(ArchetypeGenerateTask.class)
@@ -19,7 +17,7 @@ class ArchetypeGenerateTask extends DefaultTask {
     String projectName = getParam('name', 'Please enter the project name')
     String projectVersion = getParam('version', 'Please enter the version name', '1.0-SNAPSHOT')
 
-    String templatePath = System.getProperty('templates', 'src/main/resources/templates')
+    String templatePath = System.getProperty('templates', ArchetypePlugin.DIR_TEMPLATES)
 
     Map binding = [
         'group'          : projectGroup,
@@ -39,15 +37,16 @@ class ArchetypeGenerateTask extends DefaultTask {
   private static void extendedBinding(Map binding) {
     addCommandLinePropertiesToBinding(binding)
 
+    String name = binding.get('name')
     String group = binding.get('group')
 
-    binding.put('groupPath', group.replaceAll('\\.', File.separator))
+    binding.put('namePackage', name.replaceAll('\\W', '.'))
+    binding.put('namePath', name.replaceAll('\\.', '/'))
+    binding.put('groupPath', group.replaceAll('\\.', '/'))
 
-    String packageName = group + '/' + binding.get('name')
-    String normalizedPackageName = packageName.replaceAll('//', '/')
-
-    binding.put('packageName', normalizedPackageName.replaceAll('\\W', '.'))
-    binding.put('packagePath', normalizedPackageName.replaceAll('\\W', Matcher.quoteReplacement(File.separator)))
+    String packagePath = (group + '/' + name).replaceAll('//', '/')
+    binding.put('packagePath', packagePath)
+    binding.put('packageName', packagePath.replaceAll('\\W', '.'))
   }
 
   private static void addCommandLinePropertiesToBinding(binding) {

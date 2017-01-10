@@ -49,15 +49,17 @@ Parameters will firstly been searched in System Properties, which includes:
 ### Variables:
 Variables that can be used in template files.
 
-| name        | description                                        | sample                |
-| ----------- | -------------------------------------------------- | --------------------- |
-| group       | project.group                                      | com.xxx.yyy           |
-| name        | project.name                                       | dummy-app             |
-| version     | project.version                                    | 1.0-SNAPSHOT          |
-| projectName | project.name                                       | dummy-app             |
-| groupPath   | replaced '.' with '/' in group                     | com/xxx/yyy           |
-| packageName | (group + name) replaced non-characters with '.'    | com.xxx.yyy.dummy.app |
-| packagePath | replaced '.' with '/' in packageName               | com/xxx/yyy/dummy/app |
+| name         | description                                        | sample                |
+| ------------ | -------------------------------------------------- | --------------------- |
+| group        | project.group                                      | com.xxx.yyy           |
+| name         | project.name                                       | dummy-app             |
+| version      | project.version                                    | 1.0-SNAPSHOT          |
+| projectName  | project.name                                       | dummy-app             |
+| namePackage  | replaced non-characters with '.' in name           | dummy.app             |
+| namePath     | replaced non-characters with '/' in name           | dummy/app             |
+| groupPath    | replaced '.' with '/' in group                     | com/xxx/yyy           |
+| packageName  | (group + name) replaced non-characters with '.'    | com.xxx.yyy.dummy.app |
+| packagePath  | replaced '.' with '/' in packageName               | com/xxx/yyy/dummy/app |
 
 Extra variables can be added in command line:
 ```
@@ -102,6 +104,9 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.3.1
+ * Added variables: `namePackage` and `namePath`
+
 #### 1.3
  * The target folder where the generated project(s) locates is not changeable, fixed to `generated`.
  * The generation will fail by default, if there are files with the same name exist in the `generated` folder.
