@@ -104,8 +104,11 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.3.1.1
+ * Fixed issue in 1.3.1, `packagePath` and `namePath` not working as expected.
+
 #### 1.3.1
- * Added variables: `namePackage` and `namePath`
+ * Added variables: `namePackage` and `namePath` (**NOTICE: do NOT use this buggy version**).
 
 #### 1.3
  * The target folder where the generated project(s) locates is not changeable, fixed to `generated`.

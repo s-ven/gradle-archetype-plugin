@@ -7,9 +7,15 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
+import java.util.regex.Pattern
+
 class ArchetypeGenerateTask extends DefaultTask {
 
   static final Logger LOGGER = Logging.getLogger(ArchetypeGenerateTask.class)
+
+  private static final Pattern PATTERN_NON_ALPHA_NUMERIC = Pattern.compile('[^0-9a-zA-Z]')
+  private static final Pattern PATTERN_DOUBLE_SLASHES = Pattern.compile('//')
+  private static final Pattern PATTERN_DOUBLE_DOTS = Pattern.compile('..')
 
   @TaskAction
   create() {
@@ -40,13 +46,31 @@ class ArchetypeGenerateTask extends DefaultTask {
     String name = binding.get('name')
     String group = binding.get('group')
 
-    binding.put('namePackage', name.replaceAll('\\W', '.'))
-    binding.put('namePath', name.replaceAll('\\.', '/'))
-    binding.put('groupPath', group.replaceAll('\\.', '/'))
+    binding.put('namePackage', replaceAllNonAlphaNumericWith(name, "."))
 
-    String packagePath = (group + '/' + name).replaceAll('//', '/')
+    String namePath = replaceAllNonAlphaNumericWith(name, '/')
+    binding.put('namePath', namePath)
+
+    String groupPath = replaceAllNonAlphaNumericWith(group, '/')
+    binding.put('groupPath', groupPath)
+
+    String packagePath = replaceDoubleSlashesWithSingleOne(
+        replaceAllNonAlphaNumericWith(groupPath + '/' + namePath, '/')
+    )
     binding.put('packagePath', packagePath)
-    binding.put('packageName', packagePath.replaceAll('\\W', '.'))
+    binding.put('packageName', replaceAllNonAlphaNumericWith(packagePath, '.'))
+  }
+
+  private static String replaceAllNonAlphaNumericWith(String name, String replacement) {
+    return PATTERN_NON_ALPHA_NUMERIC.matcher(name).replaceAll(replacement)
+  }
+
+  private static String replaceDoubleSlashesWithSingleOne(String name) {
+    return PATTERN_DOUBLE_SLASHES.matcher(name).replaceAll("/")
+  }
+
+  private static String replaceDoubleDotsWithSingleOne(String name) {
+    return PATTERN_DOUBLE_DOTS.matcher(name).replaceAll(".")
   }
 
   private static void addCommandLinePropertiesToBinding(binding) {
