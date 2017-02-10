@@ -70,6 +70,12 @@ Extra variables can be added in command line:
  * In code: `@variable@`
  * In file name: `__variable__`
 
+Additional GString expressions can be defined between the `@` and `__` tokens :
+ * `@variable.capitalize()@`
+ * `__new Date()__`
+
+See [GStringTemplateEngine](http://docs.groovy-lang.org/latest/html/api/groovy/text/GStringTemplateEngine.html)
+
 ### Generated Project(s) Folder
 Fixed to: `generated`.
 
