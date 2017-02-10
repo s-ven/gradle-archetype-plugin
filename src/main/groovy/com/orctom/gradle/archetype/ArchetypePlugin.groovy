@@ -10,7 +10,7 @@ class ArchetypePlugin implements Plugin<Project> {
 
   @Override
   void apply(Project project) {
-    project.task('clean', type: ArchetypeCleanTask)
+    project.task('archClean', type: ArchetypeCleanTask)
     project.task('generate', type: ArchetypeGenerateTask)
   }
 

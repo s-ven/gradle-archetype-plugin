@@ -7,17 +7,17 @@ Generating projects from local template.
 https://plugins.gradle.org/plugin/com.orctom.archetype
 
 ### Tasks
- * `clean`: cleans the generated folders and files.
+ * `archClean`: cleans the generated folders and files.
  * `generate`: generates projects from the template.
 
 ### Interactive Mode:
 ```
-gradle clean generate -i
+gradle archClean generate -i
 ```
 
 ### Batch Mode:
 ```
-gradle clean generate -i -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
+gradle archClean generate -i -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
 ```
 
 ### Parameters
