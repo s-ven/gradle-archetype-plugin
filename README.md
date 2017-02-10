@@ -7,17 +7,17 @@ Generating projects from local template.
 https://plugins.gradle.org/plugin/com.orctom.archetype
 
 ### Tasks
- * `archClean`: cleans the generated folders and files.
+ * `cleanArchetype`: cleans the generated folders and files.
  * `generate`: generates projects from the template.
 
 ### Interactive Mode:
 ```
-gradle archClean generate -i
+gradle cleanArch generate -i
 ```
 
 ### Batch Mode:
 ```
-gradle archClean generate -i -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
+gradle cleanArch generate -i -Dtarget=generated -Dgroup=com.xxx.yyy -Dname=dummy-service -Dversion=1.0-SNAPSHOT
 ```
 
 ### Parameters
@@ -110,6 +110,10 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.4
+ * Renamed `clean` task to `cleanArchetype`, as _"Declaring custom check, **clean**, build or assemble tasks is not allowed anymore when using the lifecycle plugin."_ (https://docs.gradle.org/3.0/release-notes)
+ * Allowing full GString expressions to be passed on to parser
+
 #### 1.3.1.1
  * Fixed issue in 1.3.1, `packagePath` and `namePath` not working as expected.
 

@@ -140,10 +140,9 @@ class FileUtils {
 
   static String resolve(String text, Map binding) {
     String escaped = text.replaceAll('\\$', '__DOLLAR__')
-    String ready = escaped.replaceAll('@(.+)@', '\\$\\{$1\\}')
+    String ready = escaped.replaceAll('@([^{}/\\\\@\\n,]+)@', '\\$\\{$1\\}')
     String resolved = engine.createTemplate(ready).make(binding)
-    String done = resolved.replaceAll('__DOLLAR__', '\\$')
-    done
+    resolved.replaceAll('__DOLLAR__', '\\$')
   }
 
   // Applies variable substitution to provided path.
@@ -159,7 +158,7 @@ class FileUtils {
 
   // replaces "__variable__" (used in directory/file names) with "${variable}"
   static String resolvePath(String path) {
-    path.replaceAll('(.*)__(.+)__(.*)', '$1\\$\\{$2\\}$3')
+    path.replaceAll('(.*)__([^{}/\\\\@\\n,]+)__(.*)', '$1\\$\\{$2\\}$3')
   }
 
 }
