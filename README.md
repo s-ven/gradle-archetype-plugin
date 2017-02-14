@@ -61,9 +61,18 @@ Variables that can be used in template files.
 | packageName  | (group + name) replaced non-characters with '.'    | com.xxx.yyy.dummy.app |
 | packagePath  | replaced '.' with '/' in packageName               | com/xxx/yyy/dummy/app |
 
-Extra variables can be added in command line:
+#### Adding Custom variables
+Extra variables can be added via command line or programmatically with the
+`com.orctom.gradle.archetype.binding` prefix.
+
+Command line :
 ```
 -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...
+```
+
+Property prefix :
+```
+System.setProperty('com.orctom.gradle.archetype.binding.param1', value1)
 ```
 
 ### Token Format
