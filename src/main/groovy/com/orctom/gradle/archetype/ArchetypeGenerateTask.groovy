@@ -47,19 +47,24 @@ class ArchetypeGenerateTask extends DefaultTask {
     String name = binding.get('name')
     String group = binding.get('group')
 
-    binding.put('namePackage', replaceAllNonAlphaNumericWith(name, "."))
+    !binding.containsKey('namePackage') &&
+      binding.put('namePackage', replaceAllNonAlphaNumericWith(name, "."))
 
     String namePath = replaceAllNonAlphaNumericWith(name, '/')
-    binding.put('namePath', namePath)
+    !binding.containsKey('namePath') &&
+      binding.put('namePath', namePath)
 
     String groupPath = replaceAllNonAlphaNumericWith(group, '/')
-    binding.put('groupPath', groupPath)
+    !binding.containsKey('groupPath') &&
+      binding.put('groupPath', groupPath)
 
     String packagePath = replaceDoubleSlashesWithSingleOne(
         replaceAllNonAlphaNumericWith(groupPath + '/' + namePath, '/')
     )
-    binding.put('packagePath', packagePath)
-    binding.put('packageName', replaceAllNonAlphaNumericWith(packagePath, '.'))
+    !binding.containsKey('packagePath') &&
+      binding.put('packagePath', packagePath)
+    !binding.containsKey('packageName') &&
+      binding.put('packageName', replaceAllNonAlphaNumericWith(packagePath, '.'))
   }
 
   private static String replaceAllNonAlphaNumericWith(String name, String replacement) {
