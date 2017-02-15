@@ -119,6 +119,10 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.4.1
+ * Adding ability to programmatically add bindings.(pr #12)
+ * Do not override properties if already defined. (pr #13)
+
 #### 1.4
  * Renamed `clean` task to `cleanArchetype`, as _"Declaring custom check, **clean**, build or assemble tasks is not allowed anymore when using the lifecycle plugin."_ (https://docs.gradle.org/3.0/release-notes)
  * Allowing full GString expressions to be passed on to parser
