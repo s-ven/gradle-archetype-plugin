@@ -42,6 +42,7 @@ class ArchetypeGenerateTask extends DefaultTask {
 
   private static void extendedBinding(Map binding) {
     addCommandLinePropertiesToBinding(binding)
+    addPropertyScopedBindings(binding)
 
     String name = binding.get('name')
     String group = binding.get('group')
@@ -85,6 +86,13 @@ class ArchetypeGenerateTask extends DefaultTask {
         }
       }
     }
+  }
+
+  private static void addPropertyScopedBindings(binding) {
+    final String propertyBinding = "com.orctom.gradle.archetype.binding"
+    final int scopeSize = propertyBinding.length() + 1
+    System.getProperties().findAll { p -> p.key.startsWith(propertyBinding) }
+        .each { p -> binding.put(p.key.substring(scopeSize), p.value) }
   }
 
   private static String getParam(String paramName, String prompt, String defaultValue = null) {
