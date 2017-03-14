@@ -119,6 +119,9 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.4.2
+ * Added escape for `@`。[#14](https://github.com/orctom/gradle-archetype-plugin/pull/14)
+
 #### 1.4.1
  * Adding ability to programmatically add bindings. #12
  * Do not override properties if already defined. #13
