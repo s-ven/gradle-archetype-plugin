@@ -108,6 +108,7 @@ class FileUtils {
   private static File getTargetFile(Path sourceDirPath, File targetDir, File source, Map binding) {
     Path sourcePath = sourceDirPath.relativize(source.toPath())
     String rawTargetPath = new File(targetDir, resolvePaths(sourcePath)).path
+    rawTargetPath = rawTargetPath.replaceAll("\\\\", "/")
     String resolvedTargetPath = engine.createTemplate(rawTargetPath).make(binding)
     new File(resolvedTargetPath)
   }
