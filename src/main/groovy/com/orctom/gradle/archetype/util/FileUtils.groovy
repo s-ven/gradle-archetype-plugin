@@ -140,12 +140,22 @@ class FileUtils {
   }
 
   static String resolve(String text, Map binding) {
-    String escaped = text.replaceAll('\\$', '__DOLLAR__')
-    escaped = escaped.replaceAll('@@', '__AT__')
+    String escaped = escape(text)
     String ready = escaped.replaceAll('@([^{}/\\\\@\\n,]+)@', '\\$\\{$1\\}')
     String resolved = engine.createTemplate(ready).make(binding)
-    resolved.replaceAll('__DOLLAR__', '\\$')
-    resolved.replaceAll('__AT__', '@')
+    unescape(resolved)
+  }
+
+  private static String escape(String text) {
+    String escaped = text.replaceAll('\\$', '__DOLLAR__')
+    escaped = escaped.replaceAll('@@', '__AT__')
+    escaped
+  }
+
+  private static String unescape(String resolved) {
+    String unescaped = resolved.replaceAll('__DOLLAR__', '\\$')
+    unescaped = unescaped.replaceAll('__AT__', '@')
+    unescaped
   }
 
   // Applies variable substitution to provided path.
