@@ -141,7 +141,7 @@ class FileUtils {
 
   static String resolve(String text, Map binding) {
     String escaped = escape(text)
-    String ready = escaped.replaceAll('@([^{}/\\\\@\\n,]+)@', '\\$\\{$1\\}')
+    String ready = escaped.replaceAll('@([^{}/\\\\@\\n,\\s]+)@', '\\$\\{$1\\}')
     String resolved = engine.createTemplate(ready).make(binding)
     unescape(resolved)
   }
