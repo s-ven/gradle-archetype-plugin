@@ -119,8 +119,14 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.4.6
+ * Fixed issue [#19](https://github.com/orctom/gradle-archetype-plugin/pull/19)
+
+#### 1.4.5
+ * Fixed issue [#17](https://github.com/orctom/gradle-archetype-plugin/pull/17)
+
 #### 1.4.4
- * Fixed issue #16 (introduced in `1.4.3`)
+ * Fixed issue [#16](https://github.com/orctom/gradle-archetype-plugin/pull/17) (introduced in `1.4.3`)
 
 #### 1.4.3
  * Fixed issue for windows.[#15](https://github.com/orctom/gradle-archetype-plugin/pull/15)
