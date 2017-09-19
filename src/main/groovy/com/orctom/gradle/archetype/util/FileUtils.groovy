@@ -56,6 +56,9 @@ class FileUtils {
     Set<String> nonTemplatesWildcards = nonTemplatesFile.readLines() as Set
     FileNameFinder finder = new FileNameFinder()
     nonTemplatesWildcards.each {
+      if (null == it || 0 == it.trim().length() || it.startsWith("#")) {
+        return
+      }
       def files = finder.getFileNames(templateDirPath, it)
       nonTemplates.addAll(files)
     }
