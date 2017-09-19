@@ -95,6 +95,7 @@ and put the file to template folder (such as `src/main/resources/templates`) or 
 
 Sample:
 ```
+# comments
 **/*.jar
 **/*.bat
 **/*.sh
@@ -103,6 +104,7 @@ Sample:
 **/*.xz
 **/*.tar
 **/*.7z
+
 gradle/
 .gradle/
 gradlew
@@ -120,7 +122,7 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
 
 ### Change Logs
 #### 1.4.6
- * Fixed issue [#19](https://github.com/orctom/gradle-archetype-plugin/pull/19)
+ * Fixed issue [#19](https://github.com/orctom/gradle-archetype-plugin/pull/19) blank lines and comments support in `.nontemplate`
 
 #### 1.4.5
  * Fixed issue [#17](https://github.com/orctom/gradle-archetype-plugin/pull/17)
