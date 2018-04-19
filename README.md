@@ -75,6 +75,25 @@ Property prefix :
 System.setProperty('com.orctom.gradle.archetype.binding.param1', value1)
 ```
 
+#### Programmatic Customization of Bindings
+Often, additional variables (bindings) need to be created based on the values of existing variables after they have
+ been resolved (e.g., when they are entered in interactive mode), but prior to the start of the actual generation
+ process.
+
+The `generate` task can be configured with a processor that is called just prior to the actual file generation, but
+after all other variables have been resolved. The processor is just a closure that accepts a single argument, the
+current binding configuration as a `Map`.  The processor is specified by setting the `bindingProcessor` property
+of the `generate` task.
+
+For example:
+```groovy
+generate {
+    bindingProcessor = { bindings ->
+        bindings.capitalizedName = bindings.name.capitalize()
+    }
+}
+```
+
 ### Token Format
  * In code: `@variable@`
  * In file name: `__variable__`

@@ -17,6 +17,17 @@ class ArchetypeGenerateTask extends DefaultTask {
   private static final Pattern PATTERN_DOUBLE_SLASHES = Pattern.compile('//')
   private static final Pattern PATTERN_DOUBLE_DOTS = Pattern.compile('..')
 
+  ArchetypeGenerateTask() {
+    ext {
+
+      // This property allows the consuming plugin to configure this task with a closure that will be
+      // invoked just prior to performing the actual generation.  It gives the project a chance to
+      // add/modify the bindings as needed.
+
+      bindingProcessor = {} // Default processor does nothing
+    }
+  }
+
   @TaskAction
   create() {
     String projectGroup = getParam('group', 'Please enter the group name')
@@ -35,6 +46,10 @@ class ArchetypeGenerateTask extends DefaultTask {
         'project.version': projectVersion
     ]
     extendedBinding(binding)
+
+    // Now that all the bindings have been resolved, let the consuming project perform any customizations they need
+    bindingProcessor.call(binding)
+
     logBindings(binding)
 
     FileUtils.generate(project.projectDir, templatePath, binding, isFailIfFileExist())
