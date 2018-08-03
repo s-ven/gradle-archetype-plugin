@@ -25,6 +25,7 @@ class ArchetypeGenerateTask extends DefaultTask {
       // add/modify the bindings as needed.
 
       bindingProcessor = {} // Default processor does nothing
+      bindingsToPrompt = []
     }
   }
 
@@ -45,6 +46,9 @@ class ArchetypeGenerateTask extends DefaultTask {
         'version'        : projectVersion,
         'project.version': projectVersion
     ]
+
+    bindingsToPrompt.each{ key, defaultValue -> this.class.getParam(key, "Please enter " + key, defaultValue) }
+
     extendedBinding(binding)
 
     // Now that all the bindings have been resolved, let the consuming project perform any customizations they need
