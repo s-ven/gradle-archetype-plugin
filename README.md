@@ -75,6 +75,20 @@ Property prefix :
 System.setProperty('com.orctom.gradle.archetype.binding.param1', value1)
 ```
 
+#### Prompt for custom variables
+Extra variables (bindings) can be prompted if missing, just like group or name.
+
+Provide `bindingsToPrompt` map where key is binding name and value is default value for variable. If none default should
+be available, just put empty `String`
+
+Example:
+```groovy
+generate {
+   bindingsToPrompt = ["apiVersion" : "1", "createdBy" : ""]
+}
+```
+
+
 #### Programmatic Customization of Bindings
 Often, additional variables (bindings) need to be created based on the values of existing variables after they have
  been resolved (e.g., when they are entered in interactive mode), but prior to the start of the actual generation
