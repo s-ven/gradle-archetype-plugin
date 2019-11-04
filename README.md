@@ -154,6 +154,9 @@ https://github.com/orctom/gradle-archetype-plugin/tree/master/src/test/resources
  * In interactive mode, the prompt text got truncated sometimes.
 
 ### Change Logs
+#### 1.4.8
+ * [#29](https://github.com/orctom/gradle-archetype-plugin/pull/29) Add custom variable prompting functionality
+
 #### 1.4.6.3
  * Fixed issue [#19](https://github.com/orctom/gradle-archetype-plugin/pull/19) blank lines and comments support in `.nontemplate`
 
